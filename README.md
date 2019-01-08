@@ -88,3 +88,13 @@ A message can have several semantic relationships between different fields.  The
 <ontology source="srcIp" edge="connectsTo" dest="dstIp"/>
 ```
 Ontologies are designed to be ingested into large-scale graph databases.  They are directional and consist of a source node, a destination node, and an edge between them that is generally presented in a form of a verb
+
+# Schema Extensions
+
+There are two types of schemas supported: 
+
+```
+<schema type="common" version="0.1"
+<schema type="extension" version="0.1"
+```
+A common schema is the basic core schema to be used by the system.  An n number of schema extension can be appended to the common schema as additional telemetries or enrichments are added.  Each can have its own schema extension.  Each extension can add additional fields, supertypes, traits, or ontologies to the common schema.  An example of a schema extension can be seen [here](https://github.com/james-sirota/OpenSchema/blob/master/Schemas/Protocol_HTTP.schema_extension)
