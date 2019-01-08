@@ -107,7 +107,103 @@ A structure of a mapping entry is as fllows:
 
 ```
 <mapping name="srcIp">
-		<field>id.orig_h</field>
+	<field>id.orig_h</field>
 </mapping>
  ```
 A mapping can have a list of raw message fields from multiple telemetries that will auto-map by the framework to a known field that has a defined schema
+
+# A Working Example
+
+[An example Bro HTTP parser](https://github.com/james-sirota/OpenSchema/blob/master/src/main/java/common/Driver.java) is provided to show how a parser would use a schema and its features.
+
+Given a raw bro HTTP message:
+
+```
+{"http":{"ts":1402307733473,"uid":"CTo78A11g7CYbbOHvj","id.orig_h":"192.249.113.37","id.orig_p":58808,"id.resp_h":"72.163.4.161","id.resp_p":80,"trans_depth":1,"method":"GET","host":"www.cisco.com","uri":"/","user_agent":"curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3","request_body_len":0,"response_body_len":25523,"status_code":200,"status_msg":"OK","tags":[],"resp_fuids":["FJDyMC15lxUn5ngPfd"],"resp_mime_types":["text/html"]}}
+```
+### Step 1 
+
+Call a parser to parse it:
+
+```
+BroParser bp = new BroParser();
+JSONObject message = bp.parse(strLine);
+```
+The parser produces the following JSON:
+
+```
+{"id.orig_p":58808,"status_code":200,"method":"GET","request_body_len":0,"id.resp_p":80,"uri":"\/","tags":[],"uid":"CTo78A11g7CYbbOHvj","resp_mime_types":["text\/html"],"protocol":"http","trans_depth":1,"host":"www.cisco.com","status_msg":"OK","id.orig_h":"192.249.113.37","response_body_len":25523,"user_agent":"curl\/7.22.0 (x86_64-pc-linux-gnu) libcurl\/7.22.0 OpenSSL\/1.0.1 zlib\/1.2.3.4 libidn\/1.23 librtmp\/2.3","ts":1402307733473,"id.resp_h":"72.163.4.161","resp_fuids":["FJDyMC15lxUn5ngPfd"]}
+```
+### Step 2 
+
+Normalize the field names of a parsed message by running it through a mapper that maps them to known fields for which we have schema:
+
+```
+JSONObject normalizedMessage = bp.normalize(message);
+```
+Which produces the following output:
+
+```
+{"srcIp":"192.249.113.37","status_code":200,"method":"GET","request_body_len":0,"srcPort":58808,"uri":"\/","tags":[],"uid":"CTo78A11g7CYbbOHvj","resp_mime_types":["text\/html"],"protocol":"http","trans_depth":1,"hostname":"www.cisco.com","dstPort":80,"status_msg":"OK","dstIp":"72.163.4.161","response_body_len":25523,"user_agent":"curl\/7.22.0 (x86_64-pc-linux-gnu) libcurl\/7.22.0 OpenSSL\/1.0.1 zlib\/1.2.3.4 libidn\/1.23 librtmp\/2.3","resp_fuids":["FJDyMC15lxUn5ngPfd"],"timestamp":1402307733473}
+```
+Now we have a normalized message.  Notice timestamp, dstIp, dstPort, srcIp, srcPort, and hostname fields (for which schema names exist) are now present.   
+
+### Step 3
+
+We can now figure out to which fields in the message we can apply a schema:
+
+```
+Set<Object> schemadFields = bp.getSchemadFields(normalizedMessage);
+```
+Which returns:
+```
+[srcIp, hostname, status_code, dstPort, method, request_body_len, srcPort, dstIp, response_body_len, timestamp]
+```
+For the fields above it is possible to enforce a schema.  Other fields in the message do not have an associated schema entry and will not be run through schema validation by the parser
+
+### Step 4 
+
+Now we can validate the basic types for the fields for which we have a schema:
+
+```
+Map<Object, Boolean> valid = bp.schemaEnforce(normalizedMessage);
+```
+And we get a list of fields and the results of whether they were valid or not according to the schema:
+```
+{dstIp=true, dstPort=true, hostname=true, method=true, request_body_len=true, response_body_len=true, srcIp=true, srcPort=true, status_code=true, timestamp=true}
+```
+### Step 5
+
+If a field belogs to a supertype we need to run an additional validation step to make sure it adheres to the restrictions of the supertype:
+
+```
+valid = bp.supertypeEnforce(normalizedMessage);
+```
+And we get a list of fields and the results of whether they were valid or not according to the schema:
+```
+{dstIp=true, dstPort=true, hostname=true, method=true, request_body_len=true, response_body_len=true, srcIp=true, srcPort=true, status_code=true, timestamp=true}
+```
+
+### Step 6
+
+We now need to check if the message has any traits associated with it:
+
+```
+Set<String> traits = bp.extractTraits(normalizedMessage);
+```
+which returns all traits that match:
+```
+[communication, httpCommInbound, httpCommOutbound, httpCommTwoWay]
+```
+
+### Step 7
+
+And now we can extract ontologies from the message:
+
+```
+Set<String> ontologies = bp.getOntologies(normalizedMessage);
+```
+Which gives us the following result:
+```
+[dstIp -- resolvesTo --> hostname, srcIp -- connectsTo --> dstIp]
+```
