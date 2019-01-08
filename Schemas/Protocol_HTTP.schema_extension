@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema type="extension" version="0.1"
+	description="HTTP schema extension provided by Apache Metron project">
+	<supertypes>
+		<supertype name="httpMethod">
+			<script name="validateHttpMethod" type="validation">
+				("PUT".localeCompare("%THIS") == 0) || ("GET".localeCompare("%THIS") == 0)
+			</script>
+		</supertype>
+		<supertype name="domain">
+			<script name="validateDomain" type="validation">
+				var DOMAIN_REGEXP = /^[a-zA-Z0-9][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9]{0,1}\.([a-zA-Z]{1,6}|[a-zA-Z0-9-]{1,30}\.[a-zA-Z]{2,3})$/;
+				DOMAIN_REGEXP.test("%THIS")
+			</script>
+		</supertype>
+		<supertype name="httpcomm">
+			<script name="validateHttpcomm" type="validation">
+				%THIS >= 0
+			</script>
+		</supertype>
+		<supertype name="httpCode">
+			<script name="validateHttpCode" type="validation">
+				%THIS >= 100 || %THIS >= 600
+			</script>
+			<script name="tagHttpCode" type="autotag">
+				if (%THIS >= 100 || %THIS > 200) 
+				{
+  					%TAG = "Unusual Code";
+				}
+			</script>
+		</supertype>
+	</supertypes>	
+	<traits>
+		<trait name="httpCommTwoWay" description="Basic two-way http communication">
+			<element name="method"/>
+			<element name="hostname"/>
+			<element name="request_body_len"/>
+			<element name="response_body_len"/>
+		</trait>
+		<trait name="httpCommOutbound" description="Basic outbound http communication">
+			<element name="method"/>
+			<element name="hostname"/>
+			<element name="request_body_len"/>
+		</trait>
+		<trait name="httpCommInbound" description="Basic inbound http communication">
+			<element name="method"/>
+			<element name="hostname"/>
+			<element name="response_body_len"/>
+		</trait>
+	</traits>
+	<fields>
+		<field name="method" type="java.lang.String" supertype="httpMethod" description="Http Method"/>
+		<field name="hostname" type="java.lang.String" supertype="domain" description="Hostname of the domain"/>
+		<field name="request_body_len" type="java.lang.Integer" supertype="httpcomm" description="Length of request"/>
+		<field name="response_body_len" type="java.lang.Integer" supertype="httpcomm" description="Length of response"/>
+		<field name="status_code" type="java.lang.Integer" supertype="httpCode" description="Length of response"/>
+	</fields>
+	<ontologies>
+		<ontology source="dstIp" edge="resolvesTo" dest="hostname"/>
+	</ontologies>
+</schema>
+

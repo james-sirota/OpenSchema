@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings>
+	<mapping name="timestamp">
+		<field>ts</field>
+	</mapping>
+	<mapping name="srcIp">
+		<field>id.orig_h</field>
+	</mapping>
+	<mapping name="srcPort">
+		<field>id.orig_p</field>
+	</mapping>
+	<mapping name="dstIp">
+		<field>id.resp_h</field>
+	</mapping>
+	<mapping name="dstPort">
+		<field>id.resp_p</field>
+	</mapping>
+	<mapping name="hostname">
+		<field>host</field>
+	</mapping>
+</mappings>
