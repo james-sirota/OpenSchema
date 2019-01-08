@@ -98,3 +98,16 @@ There are two types of schemas supported:
 <schema type="extension" version="0.1"
 ```
 A common schema is the basic core schema to be used by the system.  An n number of schema extension can be appended to the common schema as additional telemetries or enrichments are added.  Each can have its own schema extension.  Each extension can add additional fields, supertypes, traits, or ontologies to the common schema.  An example of a schema extension can be seen [here](https://github.com/james-sirota/OpenSchema/blob/master/Schemas/Protocol_HTTP.schema_extension)
+
+# Schema Mappers
+
+Multiple telemetries or enrichments may have a variety of field names that should be mapped to a standard field defined by a schema.  These mappings can be defiled by a [mapping file](https://github.com/james-sirota/OpenSchema/blob/master/Mappers/Global.mapper)
+
+A structure of a mapping entry is as fllows:
+
+```
+<mapping name="srcIp">
+		<field>id.orig_h</field>
+</mapping>
+ ```
+A mapping can have a list of raw message fields from multiple telemetries that will auto-map by the framework to a known field that has a defined schema
