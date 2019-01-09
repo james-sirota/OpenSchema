@@ -49,6 +49,8 @@ public abstract class AbstractSchemadParser implements Serializable {
 			sb.append(String.format("TYPE='%s';", s.getType())); 
 			sb.append(s.getScript());
 			sb.append("}\n");
+			logger.debug(String.format("Initialized script name: %s, with a script: \n%s", s.getName(), sb.toString()));
+			
 			try {
 				engine.eval(sb.toString());
 			} catch (Exception e) {
