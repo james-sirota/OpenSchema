@@ -26,6 +26,8 @@ public class Driver {
 
 		BroParser bp = new BroParser();
 		
+		bp.initEngine();
+		
 		while ((strLine = br.readLine()) != null) 
 		{
 

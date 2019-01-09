@@ -4,28 +4,28 @@
 	<supertypes>
 		<supertype name="httpMethod">
 			<script name="validateHttpMethod" type="validation">
-				("PUT".localeCompare("%THIS") == 0) || ("GET".localeCompare("%THIS") == 0)
+				return ("PUT".localeCompare(value) == 0) || ("GET".localeCompare(value) == 0)
 			</script>
 		</supertype>
 		<supertype name="domain">
 			<script name="validateDomain" type="validation">
 				var DOMAIN_REGEXP = /^[a-zA-Z0-9][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9]{0,1}\.([a-zA-Z]{1,6}|[a-zA-Z0-9-]{1,30}\.[a-zA-Z]{2,3})$/;
-				DOMAIN_REGEXP.test("%THIS")
+				return DOMAIN_REGEXP.test(value)
 			</script>
 		</supertype>
 		<supertype name="httpcomm">
 			<script name="validateHttpcomm" type="validation">
-				%THIS >= 0
+				return value >= 0
 			</script>
 		</supertype>
 		<supertype name="httpCode">
 			<script name="validateHttpCode" type="validation">
-				%THIS >= 100 || %THIS >= 600
+				return value >= 100 || value >= 600
 			</script>
 			<script name="tagHttpCode" type="autotag">
-				if (%THIS >= 100 || %THIS > 200) 
+				if (value >= 100 || value > 200) 
 				{
-  					%TAG = "Unusual Code";
+  					TAG = "Unusual Code";
 				}
 			</script>
 		</supertype>

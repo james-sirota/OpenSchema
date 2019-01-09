@@ -7,9 +7,11 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
@@ -35,7 +37,27 @@ public abstract class AbstractSchemadParser implements Serializable {
 	private ScriptEngine engine = mgr.getEngineByName("JavaScript");
 
 	public abstract JSONObject parse(String message) throws ParseException;
-
+	
+	public void initEngine() {
+		// build validation functions
+		
+		config.getSuperTypes().values().forEach(s -> {
+			StringBuilder sb = new StringBuilder();
+			sb.append("function validate_");
+			sb.append(s.getName());
+			sb.append("(value, message){");
+			sb.append(String.format("TYPE='%s';", s.getType())); 
+			sb.append(s.getScript());
+			sb.append("}\n");
+			try {
+				engine.eval(sb.toString());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+	}
+	
 	@SuppressWarnings("unchecked")
 	public JSONObject normalize(JSONObject message) throws ParseException {
 
@@ -134,16 +156,24 @@ public abstract class AbstractSchemadParser implements Serializable {
 
 				logger.debug("Loading script for: " + s + " " + message.get(s).getClass() + " " + st.getScript());
 
-				boolean result = Boolean.parseBoolean(
-						engine.eval(st.getScript().replaceAll("%THIS", message.get(s).toString())).toString());
-
-				valid.put(s, result);
-
+				boolean result;
+				try {
+					Object obj = invocable().invokeFunction("validate_" + st.getName(), message.get(s), message.values());
+					result = (boolean) obj; 
+					valid.put(s, result);
+				} catch (NoSuchMethodException e) {
+					valid.put(s, false);
+					throw new IllegalStateException("Validation function does not exist in script engine, has it been inited?", e);
+				}
 			}
 
 		}
 
 		return valid;
+	}
+
+	private Invocable invocable() {
+		 return (Invocable) engine;
 	}
 
 	@SuppressWarnings("unchecked")
