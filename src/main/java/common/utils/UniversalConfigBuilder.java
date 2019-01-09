@@ -11,6 +11,7 @@ import org.w3c.dom.NodeList;
 
 import common.schematypes.Field;
 import common.schematypes.Ontology;
+import common.schematypes.Restriction;
 import common.schematypes.SuperType;
 import common.schematypes.Trait;
 
@@ -47,7 +48,7 @@ public class UniversalConfigBuilder implements Serializable{
 						st.setName(name);
 						st.setScript(innerNodes.item(j).getTextContent());
 						// st.print();
-						stm.put(key + type, st);
+						stm.put(key + "_" + type + "_" + name, st);
 					}
 				}
 			}
@@ -143,6 +144,30 @@ public class UniversalConfigBuilder implements Serializable{
 					
 				
 				
+			}
+		}
+		
+		return map;
+		
+	}
+	
+	protected static Map<String, Restriction> loadRestrictions(Element root) {
+		
+		Map<String, Restriction> map = new TreeMap<String, Restriction>();
+		
+		NodeList nodes = root.getChildNodes();
+		//NodeList fields = nodes.item(1).getChildNodes();
+		
+		for (int i = 0; i < nodes.getLength(); i++) {
+			if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) 
+			{
+				String parserName = nodes.item(i).getAttributes().getNamedItem("parserName").getNodeValue();
+				String fieldName = nodes.item(i).getAttributes().getNamedItem("fieldName").getNodeValue();
+				String[] restrictionName = nodes.item(i).getAttributes().getNamedItem("restrictionName").getNodeValue().split(":");
+				
+				Restriction rs = new Restriction(parserName, fieldName, restrictionName[1], restrictionName[0]);
+					
+				map.put(parserName+fieldName+restrictionName[0]+restrictionName[1], rs);
 			}
 		}
 		

@@ -10,7 +10,10 @@ A [schema](https://github.com/james-sirota/OpenSchema/blob/master/Schemas/Common
 | Component        | Description                                                                                              | 
 | -------------    |--------------------------------------------------------------------------------------------------------  |
 | fields           | Can have a basic type (Integer, Long, String), be required or optional, or belong to a supertype         | 
-| supertypes       | Field types with special restrictions (regex patterns if string or numeric ranges if numeric             |   
+| supertypes       | Global field types with special restrictions (regex patterns if string or numeric ranges if numeric  
+| 
+| restrictions     | A more restricted supertype that is enforced on per-sensor level   
+|       |   
 | traits           | A collection of fields.  If all fields of a trait are present in the message then it has this trait      | 
 | ontologies       | Semantic relationships between different fields of a message defined by a verb                           |   
   
@@ -65,6 +68,27 @@ It can also have an auto-tagging script.  An example can be seen below:
 </supertype>
  ```
 This feature may be extended and other types of scripts may be supported in the future.  If a field has an associated supertype then a complex validation will be run via a script.  At present only JavaScript validation is supported, but it can easily be extended to other kinds of scripts
+
+### Restrictions
+
+Each supertype may have a restriction that is defined on a per-sensor basis.  An example of a restriction can be [seen here]
+
+A restriction definition is defined in the supertype like so:
+
+```
+<script name="restrictToLocalIp" type="restriction">
+				var IP_REGEXP = /(^127\.)|(^192\.168\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.)|(^172\.3[0-1]\.)|(^::1$)|(^[fF [cCdD])/;
+				return IP_REGEXP.test(value)
+			</script>
+```
+
+And then mapped to a sensor like so:
+
+```
+<restriction parserName = "bro_test" fieldName = "srcIp" restrictionName="ip:restrictToLocalIp"/>
+```
+
+Here we can see a parser named bro_test that will be applying a restriction called restrictToLocalIp of the supertype ip to the field srcIp
 
 ### Traits
 

@@ -17,6 +17,7 @@ import org.xml.sax.SAXException;
 
 import common.schematypes.Field;
 import common.schematypes.Ontology;
+import common.schematypes.Restriction;
 import common.schematypes.SuperType;
 import common.schematypes.Trait;
 import common.utils.UniversalConfigBuilder;
@@ -30,22 +31,29 @@ public class ParserConfig implements Serializable{
 	private  String schemaDirectory;
 	private  String schemaExtensionDirectory;
 	private  String mapperDirectory;
+	private  String restrictionsDirectory;
 	
 	private  String schemaFile_Extension = ".schema";
 	private  String schemaExtension_FileExtension = ".schema_extension";
 	private  String mapper_FileExtension = ".mapper";
+	private  String restriction_FileExtension = ".xml";
 	
 	private  Map<String, SuperType> superTypes;
 	private  Map<String, Trait> traits;
 	private  Map<String, Field> fields;
 	private  Map<String, String> mappers;
 	private  Map<String, Ontology> ontologies;
+	private  Map<String, Restriction> restrictions;
 	
-    public ParserConfig(String schemaDirectory,  String schemaExtensionDirectory, String mapperDirectory){
+
+
+
+	public ParserConfig(String schemaDirectory,  String schemaExtensionDirectory, String mapperDirectory, String restrictionsDirectory){
     	
        	this.schemaDirectory = schemaDirectory;
     	this.schemaExtensionDirectory = schemaExtensionDirectory;
     	this.mapperDirectory = mapperDirectory;
+    	this.restrictionsDirectory = restrictionsDirectory;
     	
        	try {
     			loadConfig();
@@ -95,7 +103,14 @@ public class ParserConfig implements Serializable{
 		this.ontologies = ontologies;
 	}
 
-	
+    public Map<String, Restriction> getRestrictions() {
+		return restrictions;
+	}
+
+
+	public void setRestrictions(Map<String, Restriction> restrictions) {
+		this.restrictions = restrictions;
+	}
     
 
 
@@ -129,6 +144,7 @@ public class ParserConfig implements Serializable{
     				traits = UniversalConfigBuilder.loadTraits(root);
     				fields = UniversalConfigBuilder.loadFeilds(root);
     				ontologies = UniversalConfigBuilder.loadOntologies(root);
+    		
     				
     				
     				// Then load the schema extensions
@@ -181,6 +197,14 @@ public class ParserConfig implements Serializable{
     				}
     				System.out.println("==========================");
     				
+    				System.out.println("Number of ontologies loaded: " + ontologies.size());
+    				
+    				for(String s: ontologies.keySet())
+    				{
+    					ontologies.get(s).print();
+    				}
+    				System.out.println("==========================");
+    				
     				fileList = getExtensionSchemaFileNames(mapperDirectory, mapper_FileExtension);
     				
     				
@@ -195,13 +219,37 @@ public class ParserConfig implements Serializable{
     					mappers.putAll(UniversalConfigBuilder.loadMappers(mapperRoot));
     				}
     				
-    				System.out.println("Number of ontologies loaded: " + ontologies.size());
+    				System.out.println("Number of mappers loaded: " + mappers.size());
     				
-    				for(String s: ontologies.keySet())
+    				for(String s: mappers.keySet())
     				{
-    					ontologies.get(s).print();
+    					System.out.println(mappers.get(s));
     				}
     				System.out.println("==========================");
+
+    				
+    				fileList = getExtensionSchemaFileNames(restrictionsDirectory, restriction_FileExtension);
+    				restrictions = new TreeMap<String, Restriction>();
+    				
+    				for(int i =0; i < fileList.length; i++)
+    				{
+    					Document restriction_doc = dBuilder.parse(fileList[i]);
+    					restriction_doc.getDocumentElement().normalize();
+    					Element mapperRoot = restriction_doc.getDocumentElement();
+    					
+    					restrictions.putAll(UniversalConfigBuilder.loadRestrictions(mapperRoot));
+    				}
+    				
+    				
+    				System.out.println("Number of restrictions loaded: " + restrictions.size());
+    				
+    				for(String s: restrictions.keySet())
+    				{
+    					restrictions.get(s).print();
+    				}
+    				System.out.println("==========================");
+    				
+    				
     }
     
     private  File[] getExtensionSchemaFileNames(String dirString, final String extension)

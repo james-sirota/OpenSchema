@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<restrictions>
+	<restriction parserName = "bro_test" fieldName = "srcIp" restrictionName="ip:restrictToLocalIp"/>
+</restrictions>

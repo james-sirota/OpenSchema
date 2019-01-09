@@ -1,6 +1,7 @@
 package common.parser;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -12,7 +13,6 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
@@ -20,11 +20,12 @@ import org.slf4j.LoggerFactory;
 
 import common.schematypes.Field;
 import common.schematypes.Ontology;
+import common.schematypes.Restriction;
 import common.schematypes.SuperType;
 import common.schematypes.Trait;
 import common.utils.ParserConfig;
 
-public abstract class AbstractSchemadParser implements Serializable {
+public abstract class AbstractSchemadParser extends ConfiguredParser implements Serializable {
 
 	/**
 	 * 
@@ -32,25 +33,47 @@ public abstract class AbstractSchemadParser implements Serializable {
 	private static final long serialVersionUID = -5677809136509623225L;
 	private final Logger logger = LoggerFactory.getLogger(AbstractSchemadParser.class);
 
-	private ParserConfig config = new ParserConfig("./Schemas", "./Schemas", "./Mappers");
+	private ParserConfig config;
 	private ScriptEngineManager mgr = new ScriptEngineManager();
-	private ScriptEngine engine = mgr.getEngineByName("JavaScript");
+	private ScriptEngine engine;
+
+	public AbstractSchemadParser(Map<String, String> cnf) {
+		super(cnf);
+		logger.debug("Initializing parser: " + getConfigItem("parserName"));
+
+		String schemaDir = getConfigItem("schemaDirectory");
+		String extensionsDir = getConfigItem("schemaExtensionDirectory");
+		String mapperDir = getConfigItem("mapperDirectory");
+		String restrictionsDir = getConfigItem("restrictionsDirectory");
+
+		logger.debug(String.format(
+				"Initializing parser with schema directory: %s, extensions directory: %s, mapper directory: %s, restrictions directory: %s",
+				schemaDir, extensionsDir, mapperDir, restrictionsDir));
+
+		config = new ParserConfig(schemaDir, extensionsDir, mapperDir, restrictionsDir);
+
+		logger.debug("Initializing script engine: " + getConfigItem("scriptType"));
+		engine = mgr.getEngineByName(getConfigItem("scriptType"));
+		initEngine();
+
+	}
 
 	public abstract JSONObject parse(String message) throws ParseException;
-	
+
 	public void initEngine() {
 		// build validation functions
-		
+
 		config.getSuperTypes().values().forEach(s -> {
 			StringBuilder sb = new StringBuilder();
-			sb.append("function validate_");
+
+			sb.append("function " + s.getType() + "_");
 			sb.append(s.getName());
 			sb.append("(value, message){");
-			sb.append(String.format("TYPE='%s';", s.getType())); 
+			sb.append(String.format("TYPE='%s';", s.getType()));
 			sb.append(s.getScript());
 			sb.append("}\n");
 			logger.debug(String.format("Initialized script name: %s, with a script: \n%s", s.getName(), sb.toString()));
-			
+
 			try {
 				engine.eval(sb.toString());
 			} catch (Exception e) {
@@ -59,7 +82,7 @@ public abstract class AbstractSchemadParser implements Serializable {
 			}
 		});
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public JSONObject normalize(JSONObject message) throws ParseException {
 
@@ -105,7 +128,6 @@ public abstract class AbstractSchemadParser implements Serializable {
 			}
 		}
 
-
 		return foundFields;
 	}
 
@@ -141,41 +163,76 @@ public abstract class AbstractSchemadParser implements Serializable {
 		return valid;
 	}
 
-	public Map<Object, Boolean> supertypeEnforce(JSONObject message) throws ScriptException {
+	public Map<Object, Boolean> supertypeEnforce(Set<Object> fieldsToCheck, JSONObject message,
+			boolean withLocalizedRestrictions) throws ScriptException {
 		logger.debug("Enforcing super types for message : " + message);
 
-		Set<Object> foundFields = getSchemadFields(message);
 		Map<Object, Boolean> valid = new TreeMap<Object, Boolean>();
 
-		for (Object s : foundFields) {
-			String f = config.getFields().get(s).getSuperType();
+		config.getSuperTypes().values().forEach(s -> {
 
-			if (f != null) {
-				String key = f + "validation";
-				logger.debug("Evaluating key: " + key);
+			for (Object f : fieldsToCheck) {
+				Field foundField = config.getFields().get(f);
 
-				SuperType st = config.getSuperTypes().get(key);
+				logger.debug("Looking at field: " + f);
 
-				logger.debug("Loading script for: " + s + " " + message.get(s).getClass() + " " + st.getScript());
+				if (foundField.getSuperType() != null && s.getParentElement().equals(foundField.getSuperType())) {
+					logger.debug(String.format("Field: %s has supertype: %s: ", foundField.getName(),
+							foundField.getSuperType()));
 
-				boolean result;
-				try {
-					Object obj = invocable().invokeFunction("validate_" + st.getName(), message.get(s), message.values());
-					result = (boolean) obj; 
-					valid.put(s, result);
-				} catch (NoSuchMethodException e) {
-					valid.put(s, false);
-					throw new IllegalStateException("Validation function does not exist in script engine, has it been inited?", e);
+					if (s.getType().equals("validation")) {
+						logger.debug(String.format("Validating: %s against the following script: %s: ",
+								foundField.getName(), s.getScript()));
+
+						boolean result = executeScript(s, f, message, "validation_");
+
+						valid.put(f, result);
+
+					}
+
+					if (s.getType().equals("restriction") && withLocalizedRestrictions) {
+						Collection<Restriction> restrictions = config.getRestrictions().values();
+
+						restrictions.forEach(r -> {
+
+							if (r.getFieldName().equals(foundField.getName())
+									&& foundField.getSuperType().equals(r.getParentSupertype())
+									&& r.getRestrictionName().equals(s.getName())) {
+								logger.debug(String.format("Restricting: %s against the following script: %s: ",
+										foundField.getName(), s.getScript()));
+								boolean result = executeScript(s, f, message, "restriction_");
+								valid.put(f, result);
+							}
+						});
+					}
 				}
 			}
-
-		}
+		});
 
 		return valid;
 	}
 
+	private boolean executeScript(SuperType s, Object f, JSONObject message, String scriptExtension) {
+		boolean result = false;
+		try {
+			Object obj = invocable().invokeFunction(scriptExtension + s.getName(), message.get(f), message.values());
+			result = (boolean) obj;
+			// valid.put(f, result);
+			logger.debug(String.format("Value: %s evaluated to: %s: ", message.get(f), result));
+		} catch (NoSuchMethodException e) {
+			// valid.put(f, false);
+			logger.debug(String.format("Value: %s evaluated to: %s: ", message.get(f), false));
+			throw new IllegalStateException("Validation function does not exist in script engine, has it been inited?",
+					e);
+		} catch (ScriptException e) {
+			e.printStackTrace();
+		}
+
+		return result;
+	}
+
 	private Invocable invocable() {
-		 return (Invocable) engine;
+		return (Invocable) engine;
 	}
 
 	@SuppressWarnings("unchecked")
