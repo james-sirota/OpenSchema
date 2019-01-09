@@ -10,10 +10,8 @@ A [schema](https://github.com/james-sirota/OpenSchema/blob/master/Schemas/Common
 | Component        | Description                                                                                              | 
 | -------------    |--------------------------------------------------------------------------------------------------------  |
 | fields           | Can have a basic type (Integer, Long, String), be required or optional, or belong to a supertype         | 
-| supertypes       | Global field types with special restrictions (regex patterns if string or numeric ranges if numeric  
-| 
-| restrictions     | A more restricted supertype that is enforced on per-sensor level   
-|       |   
+| supertypes       | Global field types with special restrictions (regex patterns if string or numeric ranges if numeric      |
+| restrictions     | A more restricted supertype that is enforced on per-sensor level    				      |
 | traits           | A collection of fields.  If all fields of a trait are present in the message then it has this trait      | 
 | ontologies       | Semantic relationships between different fields of a message defined by a verb                           |   
   
@@ -71,7 +69,7 @@ This feature may be extended and other types of scripts may be supported in the 
 
 ### Restrictions
 
-Each supertype may have a restriction that is defined on a per-sensor basis.  An example of a restriction can be [seen here]
+Each supertype may have a restriction that is defined on a per-sensor basis.  An example of a restriction can be [seen here](https://github.com/james-sirota/OpenSchema/blob/master/Sensor-Specific/Restrictions.xml)
 
 A restriction definition is defined in the supertype like so:
 
@@ -201,14 +199,29 @@ And we get a list of fields and the results of whether they were valid or not ac
 If a field belogs to a supertype we need to run an additional validation step to make sure it adheres to the restrictions of the supertype:
 
 ```
-valid = bp.supertypeEnforce(normalizedMessage);
+valid = bp.supertypeEnforce(schemadFields, normalizedMessage, false);
 ```
 And we get a list of fields and the results of whether they were valid or not according to the schema:
 ```
 {dstIp=true, dstPort=true, hostname=true, method=true, request_body_len=true, response_body_len=true, srcIp=true, srcPort=true, status_code=true, timestamp=true}
 ```
+The boolean false means we do not enforce sensor-specific restrictions
 
 ### Step 6
+
+To enforce sensor specific restrictions do:
+
+```
+valid = bp.supertypeEnforce(schemadFields, normalizedMessage, true);
+```
+And we get a list of fields and the results of whether they were valid or not according to the schema:
+```
+{dstIp=true, dstPort=true, hostname=true, method=true, request_body_len=true, response_body_len=true, srcIp=false, srcPort=true, status_code=true, timestamp=true}
+```
+
+We can see that srcIp=false because it does not conform to a restriction of being a local IP
+
+### Step 7
 
 We now need to check if the message has any traits associated with it:
 
@@ -220,7 +233,7 @@ which returns all traits that match:
 [communication, httpCommInbound, httpCommOutbound, httpCommTwoWay]
 ```
 
-### Step 7
+### Step 8
 
 And now we can extract ontologies from the message:
 
