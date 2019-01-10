@@ -132,6 +132,34 @@ A structure of a mapping entry is as fllows:
  ```
 A mapping can have a list of raw message fields from multiple telemetries that will auto-map by the framework to a known field that has a defined schema
 
+# Index Template Generators
+
+It is possible to generate Solr and Elastic templates from the schema fields.  To do so you must implement the following optional attributes on a field you wish to be included in a template:
+
+```
+<field name="srcIp" ... required="false" indexed="true" stored="true" persisted="true" ...
+```
+
+###Solr Templates
+
+A utility is provided generate a Solr template from the schema definition.  This can be done by:
+
+```
+SchemaConverter cnv = (SchemaConverter) new SolrConverter(parserConfig);
+cnv.convert("./Output/Solr.schema");
+```
+A Solr template will be generated and writte out to a file
+
+###Elastic Templates
+
+A utility is provided generate a Elastic template from the schema definition.  This can be done by:
+
+```
+cnv = (SchemaConverter) new ElasticConverter(parserConfig);
+cnv.convert("./Output/Elastic.schema");
+```
+A Solr template will be generated and writte out to a file
+
 # A Working Example
 
 [An example Bro HTTP parser](https://github.com/james-sirota/OpenSchema/blob/master/src/main/java/common/Driver.java) is provided to show how a parser would use a schema and its features.
