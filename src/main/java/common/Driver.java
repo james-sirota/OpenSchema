@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import javax.script.ScriptException;
 
@@ -14,33 +13,23 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import common.parser.sensors.BroParser;
-
-
+import common.utils.schema.ConfigFileReader;
 
 public class Driver {
 
-	public static void main(String args[]) throws IOException, ParseException, ScriptException 
-	{
+	public static void main(String args[]) throws IOException, ParseException, ScriptException {
 
 		String fileName = "./src/test/resources/BroExampleOutput";
 		FileInputStream fstream = new FileInputStream(fileName);
 		BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
 		String strLine;
-		
-		Map<String, String> parserConfig = new TreeMap<String, String>();
-		parserConfig.put("parserName", "bro_test");
-		parserConfig.put("scriptType", "JavaScript");
-		parserConfig.put("schemaDirectory", "./Schemas");
-		parserConfig.put("schemaExtensionDirectory", "./Schemas");
-		parserConfig.put("mapperDirectory", "./Mappers");
-		parserConfig.put("restrictionsDirectory", "./Sensor-Specific");
+
+		ConfigFileReader cfr = new ConfigFileReader();
+		Map<String, String> parserConfig = cfr.getConfig("Schema.conf");
 
 		BroParser bp = new BroParser(parserConfig);
-	
-		
-		
-		while ((strLine = br.readLine()) != null) 
-		{
+
+		while ((strLine = br.readLine()) != null) {
 
 			System.out.println("Raw message: ");
 			System.out.println(strLine);
@@ -60,7 +49,7 @@ public class Driver {
 			Set<Object> schemadFields = bp.getSchemadFields(normalizedMessage);
 			System.out.println(schemadFields);
 			System.out.println();
-			
+
 			System.out.println("Valid schemad Fields: ");
 			Map<Object, Boolean> valid = bp.schemaEnforce(normalizedMessage);
 			System.out.println(valid);
@@ -70,7 +59,7 @@ public class Driver {
 			valid = bp.supertypeEnforce(schemadFields, normalizedMessage, false);
 			System.out.println(valid);
 			System.out.println();
-			
+
 			System.out.println("Enforce restrictions: ");
 			valid = bp.supertypeEnforce(schemadFields, normalizedMessage, true);
 			System.out.println(valid);
@@ -85,9 +74,7 @@ public class Driver {
 			Set<String> ontologies = bp.getOntologies(normalizedMessage);
 			System.out.println(ontologies);
 			System.out.println();
-			
-	
-			
+
 		}
 
 		fstream.close();

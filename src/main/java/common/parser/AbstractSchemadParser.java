@@ -23,7 +23,8 @@ import common.schematypes.Ontology;
 import common.schematypes.Restriction;
 import common.schematypes.SuperType;
 import common.schematypes.Trait;
-import common.utils.ParserConfig;
+import common.utils.schema.ParserConfig;
+
 
 public abstract class AbstractSchemadParser extends ConfiguredParser implements Serializable {
 
@@ -41,16 +42,7 @@ public abstract class AbstractSchemadParser extends ConfiguredParser implements 
 		super(cnf);
 		logger.debug("Initializing parser: " + getConfigItem("parserName"));
 
-		String schemaDir = getConfigItem("schemaDirectory");
-		String extensionsDir = getConfigItem("schemaExtensionDirectory");
-		String mapperDir = getConfigItem("mapperDirectory");
-		String restrictionsDir = getConfigItem("restrictionsDirectory");
-
-		logger.debug(String.format(
-				"Initializing parser with schema directory: %s, extensions directory: %s, mapper directory: %s, restrictions directory: %s",
-				schemaDir, extensionsDir, mapperDir, restrictionsDir));
-
-		config = new ParserConfig(schemaDir, extensionsDir, mapperDir, restrictionsDir);
+		config = new ParserConfig(cnf);
 
 		logger.debug("Initializing script engine: " + getConfigItem("scriptType"));
 		engine = mgr.getEngineByName(getConfigItem("scriptType"));
