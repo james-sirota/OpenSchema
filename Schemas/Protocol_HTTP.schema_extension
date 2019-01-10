@@ -49,11 +49,11 @@
 		</trait>
 	</traits>
 	<fields>
-		<field name="method" type="java.lang.String" supertype="httpMethod" description="Http Method"/>
-		<field name="hostname" type="java.lang.String" supertype="domain" description="Hostname of the domain"/>
-		<field name="request_body_len" type="java.lang.Integer" supertype="httpcomm" description="Length of request"/>
-		<field name="response_body_len" type="java.lang.Integer" supertype="httpcomm" description="Length of response"/>
-		<field name="status_code" type="java.lang.Integer" supertype="httpCode" description="Length of response"/>
+		<field name="method" type="String" supertype="httpMethod"  indexed="true" stored="true" persisted="true" description="Http Method"/>
+		<field name="hostname" type="String" supertype="domain"  indexed="true" stored="true" persisted="true" description="Hostname of the domain"/>
+		<field name="request_body_len" type="Integer" supertype="httpcomm"  indexed="true" stored="true" persisted="true" description="Length of request"/>
+		<field name="response_body_len" type="Integer" supertype="httpcomm"  indexed="true" stored="true" persisted="true" description="Length of response"/>
+		<field name="status_code" type="Integer" supertype="httpCode"  indexed="true" stored="true" persisted="true" description="Length of response"/>
 	</fields>
 	<ontologies>
 		<ontology source="dstIp" edge="resolvesTo" dest="hostname"/>

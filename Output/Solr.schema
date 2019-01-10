@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fields>
+    <field indexed="true" name="timestamp" required="false" stored="true" type="Long"/>
+    <field indexed="true" name="srcIp" required="false" stored="true" type="String"/>
+    <field indexed="true" name="dstIp" required="false" stored="true" type="String"/>
+    <field indexed="true" name="srcPort" required="false" stored="true" type="Integer"/>
+    <field indexed="true" name="dstPort" required="false" stored="true" type="Integer"/>
+    <field indexed="true" name="proto" required="false" stored="true" type="String"/>
+    <field indexed="true" name="userName" required="false" stored="true" type="String"/>
+    <field indexed="true" name="method" stored="true" type="String"/>
+    <field indexed="true" name="hostname" stored="true" type="String"/>
+    <field indexed="true" name="request_body_len" stored="true" type="Integer"/>
+    <field indexed="true" name="response_body_len" stored="true" type="Integer"/>
+    <field indexed="true" name="status_code" stored="true" type="Integer"/>
+</fields>

@@ -123,26 +123,44 @@ public abstract class AbstractSchemadParser extends ConfiguredParser implements 
 		return foundFields;
 	}
 
+
 	@SuppressWarnings("unchecked")
-	public Map<Object, Boolean> schemaEnforce(JSONObject message) {
+	public Map<Object, Boolean> schemaEnforce(Set<Object> foundFields, JSONObject message) {
 		logger.debug("Looking at schemad message: " + message);
 
-		Set<Object> foundFields = getSchemadFields(message);
 		Map<Object, Boolean> valid = new TreeMap<Object, Boolean>();
 
 		for (Object s : foundFields) {
 
 			Field f = config.getFields().get(s);
 
-			if (f.getType().equals("java.lang.Integer")) {
-				message.put(s, Integer.parseInt(message.get(s).toString()));
-			} else if (f.getType().equals("java.lang.Long")) {
-				message.put(s, Long.parseLong(message.get(s).toString()));
+			if (f.getType().equals("Integer")) {
+				try {
+					message.put(s, Integer.parseInt(message.get(s).toString()));
+					valid.put(s, true);
+				}
+				catch(Exception e)
+				{
+					valid.put(s, false);
+				}
+			} 
+			else if (f.getType().equals("Long")) 
+			{
+
+				try {
+					message.put(s, Long.parseLong(message.get(s).toString()));
+					valid.put(s, true);
+				}
+				catch(Exception e)
+				{
+					valid.put(s, false);
+				}
 			}
 
-			logger.debug(s + " " + message.get(s).getClass() + " " + f.getType());
+			String javaClass = "java.lang." + f.getType();
+			logger.debug("Comparing classes:" + s + " " + message.get(s).getClass() + " and " + javaClass);
 
-			if (f.getType().equals(message.get(s).getClass().getName())) {
+			if (javaClass.equals(message.get(s).getClass().getName())) {
 				logger.debug(s + " conforms to schema?: " + true);
 				valid.put(s, true);
 			} else {

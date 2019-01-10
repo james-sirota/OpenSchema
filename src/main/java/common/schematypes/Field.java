@@ -12,7 +12,10 @@ public class Field implements Serializable{
 	private String type;
 	private String superType = "NA";
 	private String description;
-	boolean required = false;
+	Boolean required = null;
+	Boolean stored = null;
+	Boolean indexed = null;
+	Boolean presisted = null;
 
 	public String getName() {
 		return name;
@@ -45,14 +48,38 @@ public class Field implements Serializable{
 	public void setDescription(String description) {
 		this.description = description;
 	}
-
-	public boolean isRequired() {
+	public Boolean getRequired() {
 		return required;
 	}
 
-	public void setRequired(boolean required) {
+	public void setRequired(Boolean required) {
 		this.required = required;
 	}
+
+	public Boolean getStored() {
+		return stored;
+	}
+
+	public void setStored(Boolean stored) {
+		this.stored = stored;
+	}
+
+	public Boolean getIndexed() {
+		return indexed;
+	}
+
+	public void setIndexed(Boolean indexed) {
+		this.indexed = indexed;
+	}
+
+	public Boolean getPresisted() {
+		return presisted;
+	}
+
+	public void setPresisted(Boolean presisted) {
+		this.presisted = presisted;
+	}
+
 	
 	public void print()
 	{
@@ -61,6 +88,9 @@ public class Field implements Serializable{
 		System.out.println("SuperType 	: " + superType);
 		System.out.println("Description	: " + description);
 		System.out.println("Required	: " + required);
+		System.out.println("stored		: " + stored);
+		System.out.println("indexed		: " + indexed);
+		System.out.println("presisted	: " + presisted);
 	}
 
 }

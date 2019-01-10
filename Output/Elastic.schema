@@ -1,0 +1,42 @@
+{
+  "mappings": {
+    "_doc": {
+      "srcIp": {
+        "type": "String"
+      },
+      "hostname": {
+        "type": "String"
+      },
+      "dstPort": {
+        "type": "Integer"
+      },
+      "status_code": {
+        "type": "Integer"
+      },
+      "method": {
+        "type": "String"
+      },
+      "request_body_len": {
+        "type": "Integer"
+      },
+      "proto": {
+        "type": "String"
+      },
+      "dstIp": {
+        "type": "String"
+      },
+      "srcPort": {
+        "type": "Integer"
+      },
+      "userName": {
+        "type": "String"
+      },
+      "response_body_len": {
+        "type": "Integer"
+      },
+      "timestamp": {
+        "type": "Long"
+      }
+    }
+  }
+}

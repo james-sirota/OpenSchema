@@ -12,6 +12,9 @@ import javax.script.ScriptException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
+import common.converters.ElasticConverter;
+import common.converters.SchemaConverter;
+import common.converters.SolrConverter;
 import common.parser.sensors.BroParser;
 import common.utils.schema.ConfigFileReader;
 
@@ -51,7 +54,7 @@ public class Driver {
 			System.out.println();
 
 			System.out.println("Valid schemad Fields: ");
-			Map<Object, Boolean> valid = bp.schemaEnforce(normalizedMessage);
+			Map<Object, Boolean> valid = bp.schemaEnforce(schemadFields, normalizedMessage);
 			System.out.println(valid);
 			System.out.println();
 
@@ -74,7 +77,12 @@ public class Driver {
 			Set<String> ontologies = bp.getOntologies(normalizedMessage);
 			System.out.println(ontologies);
 			System.out.println();
-
+			
+			SchemaConverter cnv = (SchemaConverter) new SolrConverter(parserConfig);
+			cnv.convert("./Output/Solr.schema");
+			
+			cnv = (SchemaConverter) new ElasticConverter(parserConfig);
+			cnv.convert("./Output/Elastic.schema");
 		}
 
 		fstream.close();

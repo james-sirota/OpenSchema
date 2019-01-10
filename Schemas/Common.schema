@@ -41,13 +41,13 @@
 		</trait>
 	</traits>
 	<fields>
-		<field name="timestamp" type="java.lang.Long" supertype="epochTime" required="true" description="Epoch timestamp of message"/>
-		<field name="srcIp" type="java.lang.String" supertype="ip" description="Source IP address of communication"/>
-		<field name="dstIp" type="java.lang.String" supertype="ip" description="Destination IP address of communication"/>
-		<field name="srcPort" type="java.lang.Integer" supertype="tcpPort" description="Source tcp port of communication"/>
-		<field name="dstPort" type="java.lang.Integer" supertype="tcpPort" description="Destination tcp port of communication"/>
-		<field name="proto" type="java.lang.String" description="Protocol of communication"/>
-		<field name="userName" type="java.lang.String" description="Username"/>
+		<field name="timestamp" type="Long" supertype="epochTime" required="false" indexed="true" stored="true" persisted="true" description="Epoch timestamp of message"/>
+		<field name="srcIp" type="String" supertype="ip" required="false" indexed="true" stored="true" persisted="true" description="Source IP address of communication"/>
+		<field name="dstIp" type="String" supertype="ip" required="false" indexed="true" stored="true" persisted="true" description="Destination IP address of communication"/>
+		<field name="srcPort" type="Integer" supertype="tcpPort" required="false" indexed="true" stored="true" persisted="true" description="Source tcp port of communication"/>
+		<field name="dstPort" type="Integer" supertype="tcpPort" required="false" indexed="true" stored="true" persisted="true" description="Destination tcp port of communication"/>
+		<field name="proto" type="String" required="false" indexed="true" stored="true" persisted="true" description="Protocol of communication"/>
+		<field name="userName" type="String" required="false" indexed="true" stored="true" persisted="true" description="Username"/>
 	</fields>
 	<ontologies>
 		<ontology source="srcIp" edge="connectsTo" dest="dstIp"/>
