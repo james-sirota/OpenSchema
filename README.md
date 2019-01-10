@@ -148,7 +148,7 @@ A utility is provided generate a Solr template from the schema definition.  This
 SchemaConverter cnv = (SchemaConverter) new SolrConverter(parserConfig);
 cnv.convert("./Output/Solr.schema");
 ```
-A Solr template will be generated and writte out to a file
+A Solr template will be generated and writte out to a file.  An example Solr template is provided [here](https://github.com/james-sirota/OpenSchema/blob/master/Output/Solr.schema)
 
 ### Elastic Templates
 
@@ -158,7 +158,7 @@ A utility is provided generate a Elastic template from the schema definition.  T
 cnv = (SchemaConverter) new ElasticConverter(parserConfig);
 cnv.convert("./Output/Elastic.schema");
 ```
-A Solr template will be generated and writte out to a file
+A Solr template will be generated and writte out to a file.  An example Elastic template is provided [here](https://github.com/james-sirota/OpenSchema/blob/master/Output/Elastic.schema)
 
 # A Working Example
 
