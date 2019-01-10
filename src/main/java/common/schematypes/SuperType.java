@@ -45,12 +45,9 @@ public class SuperType implements Serializable{
 		this.script = script;
 	}
 	
-	public void print()
+	public String toString()
 	{
-		System.out.println("Parent : " + parentElement);
-		System.out.println("Name   : " + name);
-		System.out.println("Type   : " + type);
-		System.out.println("Script : " + script);
+		return ("Parent : " + parentElement + "Name   : " + name + "Type   : " + type + "Script : " + script);
 	}
 
 }

@@ -81,16 +81,20 @@ public class Field implements Serializable{
 	}
 
 	
-	public void print()
+	public String toString()
 	{
-		System.out.println("Name	  	: " + name);
-		System.out.println("Type	  	: " + type);
-		System.out.println("SuperType 	: " + superType);
-		System.out.println("Description	: " + description);
-		System.out.println("Required	: " + required);
-		System.out.println("stored		: " + stored);
-		System.out.println("indexed		: " + indexed);
-		System.out.println("presisted	: " + presisted);
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("Name	  	: " + name);
+		sb.append("Type	  	: " + type);
+		sb.append("SuperType 	: " + superType);
+		sb.append("Description	: " + description);
+		sb.append("Required	: " + required);
+		sb.append("stored		: " + stored);
+		sb.append("indexed		: " + indexed);
+		sb.append("presisted	: " + presisted);
+		
+		return sb.toString();
 	}
 
 }

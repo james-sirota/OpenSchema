@@ -43,9 +43,9 @@ public class Ontology implements Serializable{
 		this.to = to;
 	}
 	
-	public void print()
+	public String toString()
 	{
-		System.out.println(from + " -- " + name + " --> " + to);
+		return(from + " -- " + name + " --> " + to);
 	}
 	
 	public String getOntology()

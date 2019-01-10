@@ -56,15 +56,17 @@ public class Trait implements Serializable{
 		return fields.containsAll(tr);
 	}
 	
-	public void print()
+	public String toString()
 	{
-		System.out.println("Name        : " + name);
-		System.out.println("Description : " + description);
-		System.out.println("Elements    : ");
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("Name        : " + name  + "Description : " + description + "Elements    : ");
 		
 		for(Object s : tr)
 		{
-			System.out.println("\t" + s + " ");
+			sb.append("\t" + s + " ");
 		}
+		
+		return sb.toString();
 	}
 }

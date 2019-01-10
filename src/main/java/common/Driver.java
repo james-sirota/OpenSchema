@@ -77,8 +77,7 @@ public class Driver {
 			System.out.println(ontologies);
 			System.out.println();
 			
-			PrivateKey key = cfr.readPrivateKey("./Keys/private_key.der");
-			ParsedResult result = bp.parseWithProvenance(strLine, key);
+			
 		
 			SchemaConverter cnv = (SchemaConverter) new SolrConverter(parserConfig);
 			cnv.convert("./Output/Solr.schema");
@@ -86,6 +85,8 @@ public class Driver {
 			cnv = (SchemaConverter) new ElasticConverter(parserConfig);
 			cnv.convert("./Output/Elastic.schema");
 			
+			PrivateKey key = cfr.readPrivateKey("./Keys/private_key.der");
+			ParsedResult result = bp.parseWithProvenance(strLine, key);
 
 			System.out.println("Provenance: ");
 			for(HistoryEvent he : result.getProvenance())
