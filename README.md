@@ -140,7 +140,7 @@ It is possible to generate Solr and Elastic templates from the schema fields.  T
 <field name="srcIp" ... required="false" indexed="true" stored="true" persisted="true" ...
 ```
 
-###Solr Templates
+### Solr Templates
 
 A utility is provided generate a Solr template from the schema definition.  This can be done by:
 
@@ -150,7 +150,7 @@ cnv.convert("./Output/Solr.schema");
 ```
 A Solr template will be generated and writte out to a file
 
-###Elastic Templates
+### Elastic Templates
 
 A utility is provided generate a Elastic template from the schema definition.  This can be done by:
 
