@@ -2,25 +2,24 @@ package common;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.PrivateKey;
 import java.util.Map;
 import java.util.Set;
 
-import javax.script.ScriptException;
-
 import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 
 import common.converters.ElasticConverter;
 import common.converters.SchemaConverter;
 import common.converters.SolrConverter;
+import common.parser.HistoryEvent;
+import common.parser.ParsedResult;
 import common.parser.sensors.BroParser;
 import common.utils.schema.ConfigFileReader;
 
 public class Driver {
 
-	public static void main(String args[]) throws IOException, ParseException, ScriptException {
+	public static void main(String args[]) throws Exception {
 
 		String fileName = "./src/test/resources/BroExampleOutput";
 		FileInputStream fstream = new FileInputStream(fileName);
@@ -78,11 +77,22 @@ public class Driver {
 			System.out.println(ontologies);
 			System.out.println();
 			
+			PrivateKey key = cfr.readPrivateKey("./Keys/private_key.der");
+			ParsedResult result = bp.parseWithProvenance(strLine, key);
+		
 			SchemaConverter cnv = (SchemaConverter) new SolrConverter(parserConfig);
 			cnv.convert("./Output/Solr.schema");
 			
 			cnv = (SchemaConverter) new ElasticConverter(parserConfig);
 			cnv.convert("./Output/Elastic.schema");
+			
+
+			System.out.println("Provenance: ");
+			for(HistoryEvent he : result.getProvenance())
+			{
+				System.out.println("Event:" + he);
+			}
+			System.out.println();
 		}
 
 		fstream.close();

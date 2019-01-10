@@ -1,6 +1,9 @@
 package common.parser;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,7 +27,6 @@ import common.schematypes.Restriction;
 import common.schematypes.SuperType;
 import common.schematypes.Trait;
 import common.utils.schema.ParserConfig;
-
 
 public abstract class AbstractSchemadParser extends ConfiguredParser implements Serializable {
 
@@ -75,6 +77,20 @@ public abstract class AbstractSchemadParser extends ConfiguredParser implements 
 		});
 	}
 
+	public ParsedResult parseWithProvenance(String msg, PrivateKey pKey) throws ParseException, ScriptException, IOException, NoSuchAlgorithmException {
+		ParsedResult pr = new ParsedResult(pKey);
+
+		pr.setOriginalMessage(msg);
+		pr.setParsedMessage(parse(msg));
+		pr.setParsedMessage(normalize(pr.getParsedMessage()));
+		pr.setSchemadFields(getSchemadFields(pr.getParsedMessage()));
+		pr.setValidatedFields(schemaEnforce(pr.getSchemadFields(),pr.getParsedMessage()));
+		pr.setValidatedFields(supertypeEnforce(pr.getSchemadFields(),pr.getParsedMessage(), true));
+
+		return pr;
+
+	}
+
 	@SuppressWarnings("unchecked")
 	public JSONObject normalize(JSONObject message) throws ParseException {
 
@@ -97,11 +113,14 @@ public abstract class AbstractSchemadParser extends ConfiguredParser implements 
 			}
 		}
 
-		message.keySet().removeAll(toRemove);
-		message.putAll(tmp);
+		JSONObject toReturn = new JSONObject();
+		toReturn.putAll(message);
 
-		logger.debug("Returning normalized message: " + message + " in message " + message);
-		return message;
+		toReturn.keySet().removeAll(toRemove);
+		toReturn.putAll(tmp);
+
+		logger.debug("Returning normalized message: " + toReturn + " in message " + message);
+		return toReturn;
 
 	}
 
@@ -123,7 +142,6 @@ public abstract class AbstractSchemadParser extends ConfiguredParser implements 
 		return foundFields;
 	}
 
-
 	@SuppressWarnings("unchecked")
 	public Map<Object, Boolean> schemaEnforce(Set<Object> foundFields, JSONObject message) {
 		logger.debug("Looking at schemad message: " + message);
@@ -138,21 +156,15 @@ public abstract class AbstractSchemadParser extends ConfiguredParser implements 
 				try {
 					message.put(s, Integer.parseInt(message.get(s).toString()));
 					valid.put(s, true);
-				}
-				catch(Exception e)
-				{
+				} catch (Exception e) {
 					valid.put(s, false);
 				}
-			} 
-			else if (f.getType().equals("Long")) 
-			{
+			} else if (f.getType().equals("Long")) {
 
 				try {
 					message.put(s, Long.parseLong(message.get(s).toString()));
 					valid.put(s, true);
-				}
-				catch(Exception e)
-				{
+				} catch (Exception e) {
 					valid.put(s, false);
 				}
 			}
