@@ -160,6 +160,36 @@ cnv.convert("./Output/Elastic.schema");
 ```
 A Solr template will be generated and writte out to a file.  An example Elastic template is provided [here](https://github.com/james-sirota/OpenSchema/blob/master/Output/Elastic.schema)
 
+# Provenance 
+
+It is possible to keep an audit log of all modifications that happened to the message from the time it was received by the parser.  The audit history is then signed to prevent unautorhized changes.  Here is how to setup this feature.  First a key pair needs to be created:
+
+```
+openssl genrsa -out private_key.pem 2048
+openssl pkcs8 -topk8 -inform PEM -outform DER -in private_key.pem -out private_key.der -nocrypt
+openssl rsa -in private_key.pem -pubout -outform DER -out public_key.der
+```
+A sample set of keys is pre-generated and provided [here](https://github.com/james-sirota/OpenSchema/tree/master/Keys)
+
+Once the keys have been generated a special parseWithProvenance method needs to be called like so:
+
+```
+PrivateKey key = cfr.readPrivateKey("./Keys/private_key.der");
+ParsedResult result = bp.parseWithProvenance(strLine, key);
+result.getProvenance()
+```
+Which will produce the provenance chain:
+
+```
+Event:1547110011388 : 192.168.86.248 : {"http":{"ts":1402307733473,"uid":"CTo78A11g7CYbbOHvj","id.orig_h":"192.249.113.37","id.orig_p":58808,"id.resp_h":"72.163.4.161","id.resp_p":80,"trans_depth":1,"method":"GET","host":"www.cisco.com","uri":"/","user_agent":"curl/7.22.0 (x86_64-pc-linux-gnu) libcurl/7.22.0 OpenSSL/1.0.1 zlib/1.2.3.4 libidn/1.23 librtmp/2.3","request_body_len":0,"response_body_len":25523,"status_code":200,"status_msg":"OK","tags":[],"resp_fuids":["FJDyMC15lxUn5ngPfd"],"resp_mime_types":["text/html"]}} : VB1h4cJpAH+4pc15xwPZPIWWuZiD54VIaVbvPlUKc4EgmQ6NtFoaD6YkKdHHF87/hYmTe/MKz+ltuLEAotvVvuft4TomAZItdVuSb07iCL1DIUq7/kRdAwj9sdWaF+mUXrmE+h1SR7KBWWoy67aQBWplIi3BUrRB112E/PZlMzS+q/217aul3tBDOxLKfluFGRpEUdXJgT/wpNIKhjyjwbNDtX8PeENmC/e48DlW3jdkD7sUffKnHV42d/E0mzH12uRY2YyingggCDJ13lVf7uOrxuGYI843ptXNAcXbP6QpegAguGI5Djw6IHf4LonHnkebLWIfzPEx9OWGNuhKLw==
+Event:1547110011418 : 192.168.86.248 : {"id.orig_p":58808,"status_code":200,"method":"GET","request_body_len":0,"id.resp_p":80,"uri":"\/","tags":[],"uid":"CTo78A11g7CYbbOHvj","resp_mime_types":["text\/html"],"protocol":"http","trans_depth":1,"host":"www.cisco.com","status_msg":"OK","id.orig_h":"192.249.113.37","response_body_len":25523,"user_agent":"curl\/7.22.0 (x86_64-pc-linux-gnu) libcurl\/7.22.0 OpenSSL\/1.0.1 zlib\/1.2.3.4 libidn\/1.23 librtmp\/2.3","ts":1402307733473,"id.resp_h":"72.163.4.161","resp_fuids":["FJDyMC15lxUn5ngPfd"]} : ZxBEUWRlUOM3ZPkg7wW+bUkw+eixa6i35R9E52wi/lPLOMMN3zQi/l6Z/Ckp3p5DKVWAQXTJ1LTf0YAc1XQ+UFWLQjoofBTA5Ez3VES4dG+f9FQJTxSgxjKGD7oA1OQIogc8gRziUgOTINyqhvU0djDbg9n35/LnJYZ+CdPQ59mCmAaW8D1RTNRvK2kVghr/Miw/uZRIs2VVHTrqX30pWLwutsu81TZIBcJl1dXRImUaHsBT9bvO00pvZdtyhQfqIqk9ft+clfjMaPTaZhzRaOfVAQu5SJppjM8WJ/EXwuZSOpQqf6ajUyPoWUubit9ayNvFa+Ly10MSiPyoj/CHLw==
+Event:1547110011556 : 192.168.86.248 : [{"op":"move","from":"/id.orig_p","path":"/srcPort"},{"op":"move","from":"/id.resp_p","path":"/dstPort"},{"op":"move","from":"/host","path":"/hostname"},{"op":"move","from":"/id.orig_h","path":"/srcIp"},{"op":"move","from":"/ts","path":"/timestamp"},{"op":"move","from":"/id.resp_h","path":"/dstIp"}] : rBkI1OQurLlfgE5Gf9oRvSzyF1lVJXHUjdeeAWa2/mrGlqpS7Dcx6nGFid+22QBg0W0s0NoXXkEpFoq4ACsKJVtRbH3eghO1OABp0ch/TEKGsaM/bDO9mgU5CJfUzpp/68FsXc6JQ9upxq3ZcL8ZyxpWsciZyUv4OKq9qwCFtgT3gOSZcjlPbatDyLPNReA09gHIn4xodoxSBTYblkU34PjDzoKKsJbnvg8Vvrw+wQQbW+W/kR8K2CCRfWLlpRcXXFOTPlRHbOwKCKdi36dzCJxjyb0BJGco9dkauR3DR4jFSMcjC16ch/xyoz53yJUIsb2dvxTHUqirZtjS0QIllA==
+
+
+```
+
+The system will capture the timestamp, ip of machine where the event was run, a summary of changes, and the signature via the key provided
+
 # A Working Example
 
 [An example Bro HTTP parser](https://github.com/james-sirota/OpenSchema/blob/master/src/main/java/common/Driver.java) is provided to show how a parser would use a schema and its features.
