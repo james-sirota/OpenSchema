@@ -217,8 +217,17 @@ Given a raw bro HTTP message:
 Call a parser to parse it:
 
 ```
-BroParser bp = new BroParser();
-JSONObject message = bp.parse(strLine);
+BroParser bp = new BroParser(parserConfig);
+		
+//overwrite config items for demo purposes
+bp.setConfigItem("parse.normalizeEnable", "false");
+bp.setConfigItem("parse.basicSchemaEnforceEnable", "false");
+bp.setConfigItem("parse.supertypeEnforceEnable", "false");
+bp.setConfigItem("parse.restrictionEnforce", "false");
+
+ParsedResult result = bp.parseMessage(strLine);
+System.out.println(result.getParsedMessage());
+
 ```
 The parser produces the following JSON:
 
@@ -230,7 +239,8 @@ The parser produces the following JSON:
 Normalize the field names of a parsed message by running it through a mapper that maps them to known fields for which we have schema:
 
 ```
-JSONObject normalizedMessage = bp.normalize(message);
+bp.setConfigItem("parse.normalizeEnable", "true");
+result = bp.parseMessage(strLine);
 ```
 Which produces the following output:
 
@@ -244,7 +254,7 @@ Now we have a normalized message.  Notice timestamp, dstIp, dstPort, srcIp, srcP
 We can now figure out to which fields in the message we can apply a schema:
 
 ```
-Set<Object> schemadFields = bp.getSchemadFields(normalizedMessage);
+System.out.println(result.getSchemadFields());
 ```
 Which returns:
 ```
@@ -257,7 +267,9 @@ For the fields above it is possible to enforce a schema.  Other fields in the me
 Now we can validate the basic types for the fields for which we have a schema:
 
 ```
-Map<Object, Boolean> valid = bp.schemaEnforce(normalizedMessage);
+bp.setConfigItem("parse.basicSchemaEnforceEnable", "true");
+result = bp.parseMessage(strLine, key);
+System.out.println(result.getValidatedFields());	
 ```
 And we get a list of fields and the results of whether they were valid or not according to the schema:
 ```
@@ -268,7 +280,9 @@ And we get a list of fields and the results of whether they were valid or not ac
 If a field belogs to a supertype we need to run an additional validation step to make sure it adheres to the restrictions of the supertype:
 
 ```
-valid = bp.supertypeEnforce(schemadFields, normalizedMessage, false);
+bp.setConfigItem("parse.supertypeEnforceEnable", "true");
+result = bp.parseMessage(strLine, key);
+System.out.println(result.getValidatedFields());
 ```
 And we get a list of fields and the results of whether they were valid or not according to the schema:
 ```
@@ -281,7 +295,9 @@ The boolean false means we do not enforce sensor-specific restrictions
 To enforce sensor specific restrictions do:
 
 ```
-valid = bp.supertypeEnforce(schemadFields, normalizedMessage, true);
+bp.setConfigItem("parse.restrictionEnforce", "true");
+result = bp.parseMessage(strLine, key);
+System.out.println(result.getValidatedFields());
 ```
 And we get a list of fields and the results of whether they were valid or not according to the schema:
 ```
@@ -295,7 +311,7 @@ We can see that srcIp=false because it does not conform to a restriction of bein
 We now need to check if the message has any traits associated with it:
 
 ```
-Set<String> traits = bp.extractTraits(normalizedMessage);
+System.out.println(result.getTraits());
 ```
 which returns all traits that match:
 ```
@@ -307,7 +323,7 @@ which returns all traits that match:
 And now we can extract ontologies from the message:
 
 ```
-Set<String> ontologies = bp.getOntologies(normalizedMessage);
+System.out.println(result.getOntologies());
 ```
 Which gives us the following result:
 ```
