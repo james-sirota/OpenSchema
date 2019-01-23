@@ -1,6 +1,6 @@
-#Fields: 
+# Fields: 
 
-##Field Name:	 timestamp 
+## Field Name:	 timestamp 
 
 *Description: Epoch timestamp of message* 
 
@@ -21,7 +21,7 @@ Extended keys:
 Mappers to this field:
 
 	ts: timestamp 
-##Field Name:	 srcIp 
+## Field Name:	 srcIp 
 
 *Description: Source IP address of communication* 
 
@@ -42,7 +42,7 @@ Extended keys:
 Mappers to this field:
 
 	id.orig_h: srcIp 
-##Field Name:	 dstIp 
+## Field Name:	 dstIp 
 
 *Description: Destination IP address of communication* 
 
@@ -63,7 +63,7 @@ Extended keys:
 Mappers to this field:
 
 	id.resp_h: dstIp 
-##Field Name:	 srcPort 
+## Field Name:	 srcPort 
 
 *Description: Source tcp port of communication* 
 
@@ -84,7 +84,7 @@ Extended keys:
 Mappers to this field:
 
 	id.orig_p: srcPort 
-##Field Name:	 dstPort 
+## Field Name:	 dstPort 
 
 *Description: Destination tcp port of communication* 
 
@@ -105,7 +105,7 @@ Extended keys:
 Mappers to this field:
 
 	id.resp_p: dstPort 
-##Field Name:	 proto 
+## Field Name:	 proto 
 
 *Description: Protocol of communication* 
 
@@ -123,7 +123,7 @@ Extended keys:
 
 Mappers to this field:
 
-##Field Name:	 userName 
+## Field Name:	 userName 
 
 *Description: Username* 
 
@@ -141,7 +141,7 @@ Extended keys:
 
 Mappers to this field:
 
-##Field Name:	 method 
+## Field Name:	 method 
 
 *Description: Http Method* 
 
@@ -153,7 +153,7 @@ Extended keys:
 
 Mappers to this field:
 
-##Field Name:	 hostname 
+## Field Name:	 hostname 
 
 *Description: Hostname of the domain* 
 
@@ -166,7 +166,7 @@ Extended keys:
 Mappers to this field:
 
 	host: hostname 
-##Field Name:	 request_body_len 
+## Field Name:	 request_body_len 
 
 *Description: Length of request* 
 
@@ -178,7 +178,7 @@ Extended keys:
 
 Mappers to this field:
 
-##Field Name:	 response_body_len 
+## Field Name:	 response_body_len 
 
 *Description: Length of response* 
 
@@ -190,7 +190,7 @@ Extended keys:
 
 Mappers to this field:
 
-##Field Name:	 status_code 
+## Field Name:	 status_code 
 
 *Description: Length of response* 
 
@@ -202,9 +202,9 @@ Extended keys:
 
 Mappers to this field:
 
-#Supertypes: 
+# Supertypes: 
 
-###supertype: ip:validateIP 
+### supertype: ip:validateIP 
 
 
 ```
@@ -212,7 +212,7 @@ var IP_REGEXP = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|
 				return IP_REGEXP.test(value)
 ```
 
-###supertype: ip:restrictToLocalIp 
+### supertype: ip:restrictToLocalIp 
 
 
 ```
@@ -220,7 +220,7 @@ var IP_REGEXP = /(^127\.)|(^192\.168\.)|(^10\.)|(^172\.1[6-9]\.)|(^172\.2[0-9]\.
 				return IP_REGEXP.test(value)
 ```
 
-###supertype: ip:restrictToIpv4 
+### supertype: ip:restrictToIpv4 
 
 
 ```
@@ -228,28 +228,28 @@ var IP_REGEXP = /^(?=\d+\.\d+\.\d+\.\d+$)(?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-
 				return IP_REGEXP.test(value)
 ```
 
-###supertype: tcpPort:validatePort 
+### supertype: tcpPort:validatePort 
 
 
 ```
 return value > 0
 ```
 
-###supertype: epochTime:validateEpochTimestamp 
+### supertype: epochTime:validateEpochTimestamp 
 
 
 ```
 return value > 0
 ```
 
-###supertype: httpMethod:validateHttpMethod 
+### supertype: httpMethod:validateHttpMethod 
 
 
 ```
 return ("PUT".localeCompare(value) == 0) || ("GET".localeCompare(value) == 0)
 ```
 
-###supertype: domain:validateDomain 
+### supertype: domain:validateDomain 
 
 
 ```
@@ -257,21 +257,21 @@ var DOMAIN_REGEXP = /^[a-zA-Z0-9][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9]{0,1}\.([a-zA-Z]{
 				return DOMAIN_REGEXP.test(value)
 ```
 
-###supertype: httpcomm:validateHttpcomm 
+### supertype: httpcomm:validateHttpcomm 
 
 
 ```
 return value >= 0
 ```
 
-###supertype: httpCode:validateHttpCode 
+### supertype: httpCode:validateHttpCode 
 
 
 ```
 return value >= 100 || value >= 600
 ```
 
-###supertype: httpCode:tagHttpCode 
+### supertype: httpCode:tagHttpCode 
 
 
 ```

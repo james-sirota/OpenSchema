@@ -20,10 +20,10 @@ public class DocumentationGenerator {
 	{
 		StringBuilder sb = new StringBuilder();
 		
-		sb.append("#Fields: \n\n");
+		sb.append("# Fields: \n\n");
 		
 		config.getFields().values().forEach(field -> {
-			sb.append(String.format("##Field Name:\t %s \n\n", field.getName()));
+			sb.append(String.format("## Field Name:\t %s \n\n", field.getName()));
 			sb.append(String.format("*Description: %s* \n", field.getDescription()));
 			sb.append("\n");
 			sb.append(String.format("\ttype: %s \n", field.getType()));
@@ -49,10 +49,10 @@ public class DocumentationGenerator {
 		
 		
 		
-		sb.append("#Supertypes: \n\n");
+		sb.append("# Supertypes: \n\n");
 		
 		config.getSuperTypes().values().forEach(st ->{
-			sb.append(String.format("###supertype: %s:%s \n", st.getParentElement(), st.getName()));
+			sb.append(String.format("### supertype: %s:%s \n", st.getParentElement(), st.getName()));
 			sb.append("\n\n");
 			sb.append("```\n");
 			sb.append(st.getScript().trim());
