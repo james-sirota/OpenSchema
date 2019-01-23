@@ -119,6 +119,9 @@ There are two types of schemas supported:
 ```
 A common schema is the basic core schema to be used by the system.  An n number of schema extension can be appended to the common schema as additional telemetries or enrichments are added.  Each can have its own schema extension.  Each extension can add additional fields, supertypes, traits, or ontologies to the common schema.  An example of a schema extension can be seen [here](https://github.com/james-sirota/OpenSchema/blob/master/Schemas/Protocol_HTTP.schema_extension)
 
+# Schema Additions
+Schema extensions are meant to be immutable, but schema additions are meant to be use-case specific and put under CM control.  Schema additions are additional attributes that can be added to each field.  Each schema extension may also have a schema addition.  An example of a schema addition can be seen [here](https://raw.githubusercontent.com/james-sirota/OpenSchema/master/Schemas/Common.lucene.schema_addition)
+
 # Schema Mappers
 
 Multiple telemetries or enrichments may have a variety of field names that should be mapped to a standard field defined by a schema.  These mappings can be defiled by a [mapping file](https://github.com/james-sirota/OpenSchema/blob/master/Mappers/Global.mapper)
@@ -159,6 +162,16 @@ cnv = (SchemaConverter) new ElasticConverter(parserConfig);
 cnv.convert("./Output/Elastic.schema");
 ```
 A Solr template will be generated and writte out to a file.  An example Elastic template is provided [here](https://github.com/james-sirota/OpenSchema/blob/master/Output/Elastic.schema)
+
+# Automatic Documentation Generation
+
+It is possible to automatically generate the documentation for the schema in the markup format.  This can be done like so:
+
+```
+DocumentationGenerator dg = new DocumentationGenerator(parserConfig);
+dg.generate("./Output/SchemaDocs.md");
+```
+With the example schemas provided this will generate the [following documentation](https://github.com/james-sirota/OpenSchema/blob/master/Output/SchemaDocs.md)
 
 # Provenance 
 
