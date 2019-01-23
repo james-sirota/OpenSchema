@@ -24,6 +24,7 @@ import common.utils.schema.ParserConfig;
 public class SolrConverter implements SchemaConverter {
 
 	private ParserConfig config;
+	private final String PREFIX = "luc";
 
 	public SolrConverter(Map<String, String> cnf) {
 		config = new ParserConfig(cnf);
@@ -46,24 +47,34 @@ public class SolrConverter implements SchemaConverter {
 			Element rootEle = dom.createElement("fields");
 
 			for (Field f : config.getFields().values()) {
+				
+				//System.out.println("looking at field: " + f.toString());
+				
+				String prefixed_key = PREFIX + ":" + "indexed";
+				
+				if(f.getAllExtendedKeys().containsKey(prefixed_key))
+				{
 
-				if (f.getIndexed()) {
+				Boolean indexed = Boolean.parseBoolean(f.getExtendedFieldByKey(prefixed_key).toString());
+				
+				if (indexed != null && indexed) {
 					Element field = dom.createElement("field");
-
-					if (f.getStored() != null)
-						field.setAttribute("stored", f.getStored().toString());
-
-					if (f.getRequired() != null)
-						field.setAttribute("required", f.getRequired().toString());
-
-					if (f.getIndexed() != null)
-						field.setAttribute("indexed", f.getIndexed().toString());
+					
+					Map<String, Object> extended = f.getAllExtendedKeys();
+					
+					extended.forEach((key, value) -> {
+						
+						if(key.startsWith(PREFIX))
+							//System.out.println("Looking at key: " + key);
+							field.setAttribute(key.split(":")[1], value.toString());
+						});
+					
 
 					field.setAttribute("name", f.getName());
 					field.setAttribute("type", f.getType());
 					rootEle.appendChild(field);
 				}
-
+				}
 			}
 
 			dom.appendChild(rootEle);

@@ -15,6 +15,7 @@ import common.converters.SolrConverter;
 import common.parser.HistoryEvent;
 import common.parser.ParsedResult;
 import common.parser.sensors.BroParser;
+import common.utils.docs.DocumentationGenerator;
 import common.utils.schema.ConfigFileReader;
 
 public class Driver {
@@ -87,6 +88,9 @@ public class Driver {
 			
 			PrivateKey key = cfr.readPrivateKey("./Keys/private_key.der");
 			ParsedResult result = bp.parseWithProvenance(strLine, key);
+			
+			DocumentationGenerator dg = new DocumentationGenerator(parserConfig);
+			dg.generate("./Output/SchemaDocs.md");
 
 			System.out.println("Provenance: ");
 			for(HistoryEvent he : result.getProvenance())
@@ -99,5 +103,8 @@ public class Driver {
 		fstream.close();
 
 	}
+	
+	
+	
 
 }

@@ -39,6 +39,7 @@ public class ParserConfig implements Serializable {
 
 	private String schemaFile_Extension;
 	private String schemaExtension_FileExtension;
+	private String schemaAddition_FileExtension;
 	private String mapper_FileExtension;
 	private String restriction_FileExtension;
 
@@ -58,6 +59,7 @@ public class ParserConfig implements Serializable {
 		this.restrictionsDirectory = config.get("restrictionsDirectory");
 		this.schemaFile_Extension = config.get("schemaFile_Extension");
 		this.schemaExtension_FileExtension = config.get("schemaExtension_FileExtension");
+		this.schemaAddition_FileExtension = config.get("schemaAddition_FileExtension");
 		this.mapper_FileExtension = config.get("mapper_FileExtension");
 		this.restriction_FileExtension = config.get("restriction_FileExtension");
 
@@ -145,7 +147,7 @@ public class ParserConfig implements Serializable {
 
 		superTypes = UniversalConfigBuilder.loadSupertypes(root);
 		traits = UniversalConfigBuilder.loadTraits(root);
-		fields = UniversalConfigBuilder.loadFeilds(root);
+		fields = UniversalConfigBuilder.loadSchemaFields(root);
 		ontologies = UniversalConfigBuilder.loadOntologies(root);
 
 		// Then load the schema extensions
@@ -165,7 +167,7 @@ public class ParserConfig implements Serializable {
 
 			superTypes.putAll(UniversalConfigBuilder.loadSupertypes(extensionRoot));
 			traits.putAll(UniversalConfigBuilder.loadTraits(extensionRoot));
-			fields.putAll(UniversalConfigBuilder.loadFeilds(extensionRoot));
+			fields.putAll(UniversalConfigBuilder.loadSchemaFields(extensionRoot));
 			ontologies.putAll(UniversalConfigBuilder.loadOntologies(extensionRoot));
 		}
 
@@ -236,7 +238,22 @@ public class ParserConfig implements Serializable {
 			logger.debug(restrictions.get(s).toString());
 		}
 		logger.debug("==========================");
+		
+		
+		File[] additionFiles = getExtensionSchemaFileNames(schemaDirectory, schemaAddition_FileExtension);
+		
+		for(File f : additionFiles)
+		{
+			Document addition_doc = dBuilder.parse(f);
+			addition_doc.getDocumentElement().normalize();
+			Element additionRoot = addition_doc.getDocumentElement();
+			
+			this.fields = UniversalConfigBuilder.loadSchemaAdditions(additionRoot, this.fields);
 
+		}
+
+
+		//fields.forEach((key, field) -> {System.out.println(field.toString());});
 	}
 
 	private File[] getExtensionSchemaFileNames(String dirString, final String extension) {

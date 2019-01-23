@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -90,7 +91,7 @@ public class UniversalConfigBuilder implements Serializable{
 		return trs;
 	}
 
-	protected static Map<String, Field> loadFeilds(Element root) {
+	protected static Map<String, Field> loadSchemaFields(Element root) {
 
 		Map<String, Field> trs = new LinkedHashMap<String, Field>();
 		NodeList nodes = root.getChildNodes();
@@ -108,32 +109,50 @@ public class UniversalConfigBuilder implements Serializable{
 				if(fields.item(i).getAttributes().getNamedItem("supertype") != null)
 					f.setSuperType(fields.item(i).getAttributes().getNamedItem("supertype").getNodeValue());
 				
-				if(fields.item(i).getAttributes().getNamedItem("required") != null)
-				{
-					boolean req = Boolean.parseBoolean(fields.item(i).getAttributes().getNamedItem("required").getNodeValue());
-					f.setRequired(req);
-				}
-				if(fields.item(i).getAttributes().getNamedItem("stored") != null)
-				{
-					boolean st = Boolean.parseBoolean(fields.item(i).getAttributes().getNamedItem("stored").getNodeValue());
-					f.setStored(st);
-				}
-				if(fields.item(i).getAttributes().getNamedItem("indexed") != null)
-				{
-					boolean indx = Boolean.parseBoolean(fields.item(i).getAttributes().getNamedItem("indexed").getNodeValue());
-					f.setIndexed(indx);
-				}
-				if(fields.item(i).getAttributes().getNamedItem("persisted") != null)
-				{
-					boolean pr = Boolean.parseBoolean(fields.item(i).getAttributes().getNamedItem("persisted").getNodeValue());
-					f.setPresisted(pr);
-				}
-				
 				trs.put(name, f);
 			}
 		}
 
 		return trs;
+	}
+	
+	protected static Map<String, Field> loadSchemaAdditions(Element root, Map<String, Field> existingFields)
+	{
+
+		NodeList nodes = root.getChildNodes();
+		NodeList fields = nodes.item(1).getChildNodes();
+		
+		String namespace = root.getAttribute("namespace");
+
+		for (int i = 0; i < fields.getLength(); i++) {
+			if (fields.item(i).getNodeType() == Node.ELEMENT_NODE) {
+				
+				
+				NamedNodeMap name = fields.item(i).getAttributes();
+				
+				String fieldName = name.getNamedItem("name").getNodeValue();
+				
+				if(!existingFields.containsKey(fieldName))
+					throw new IllegalArgumentException(String.format("Cannot add optional element %s because field is not defined", fieldName));
+				
+				
+				
+				existingFields.values().forEach(field -> {
+					
+					if(field.getName().equals(fieldName))
+						for(int j=0; j < name.getLength(); j++)
+						{
+							//System.out.println("--------------" + name.item(j));
+							if(name.item(j).getNodeName()!="name")
+								field.setExtended(namespace + ":" + name.item(j).getNodeName(), name.item(j).getNodeValue());
+						}
+						
+				});
+				
+			}
+		}
+
+		return existingFields;
 	}
 	
 	protected static Map<String, String> loadMappers(Element root) {

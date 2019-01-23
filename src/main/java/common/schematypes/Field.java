@@ -1,6 +1,8 @@
 package common.schematypes;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class Field implements Serializable{
 
@@ -12,10 +14,36 @@ public class Field implements Serializable{
 	private String type;
 	private String superType = "NA";
 	private String description;
-	Boolean required = null;
-	Boolean stored = null;
-	Boolean indexed = null;
-	Boolean presisted = null;
+	Map<String, Object> extended;
+	
+	public Field()
+	{
+		extended = new TreeMap<String, Object>();
+	}
+	
+	public void setExtended(Map<String, Object> ext)
+	{
+		ext.forEach((key, value) -> {setExtended(key, value);});
+	}
+	public void setExtended(String key, Object value)
+	{
+		if(extended.containsKey(key))
+			throw new IllegalArgumentException(String.format("Unable to add additional attribute: %, % because attribute %, % already exists ", key, value, key, extended.get(key)));
+		
+		this.extended.put(key, value);
+	}
+	public boolean extendedKeyExists(String key)
+	{
+		return extended.containsKey(key);
+	}
+	public Map<String, Object> getAllExtendedKeys()
+	{
+		return this.extended;
+	}
+	public Object getExtendedFieldByKey(String key)
+	{
+		return this.extended.get(key);
+	}
 
 	public String getName() {
 		return name;
@@ -48,52 +76,17 @@ public class Field implements Serializable{
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public Boolean getRequired() {
-		return required;
-	}
-
-	public void setRequired(Boolean required) {
-		this.required = required;
-	}
-
-	public Boolean getStored() {
-		return stored;
-	}
-
-	public void setStored(Boolean stored) {
-		this.stored = stored;
-	}
-
-	public Boolean getIndexed() {
-		return indexed;
-	}
-
-	public void setIndexed(Boolean indexed) {
-		this.indexed = indexed;
-	}
-
-	public Boolean getPresisted() {
-		return presisted;
-	}
-
-	public void setPresisted(Boolean presisted) {
-		this.presisted = presisted;
-	}
 
 	
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder();
 		
-		sb.append("Name	  	: " + name);
-		sb.append("Type	  	: " + type);
-		sb.append("SuperType 	: " + superType);
-		sb.append("Description	: " + description);
-		sb.append("Required	: " + required);
-		sb.append("stored		: " + stored);
-		sb.append("indexed		: " + indexed);
-		sb.append("presisted	: " + presisted);
-		
+		sb.append("Name: " + name + "\t");
+		sb.append("Type: " + type+ "\t");
+		sb.append("SuperType: " + superType+ "\t");
+		sb.append("Description: " + description+ "\t");
+		extended.forEach((key, value) -> { sb.append(key + ": " + extended.get(key)+ "\t");});		
 		return sb.toString();
 	}
 
