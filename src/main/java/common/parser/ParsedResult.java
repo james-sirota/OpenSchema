@@ -37,8 +37,11 @@ public class ParsedResult {
 	public void setOriginalMessage(String originalMessage) throws NoSuchAlgorithmException, UnknownHostException {
 		this.originalMessage = originalMessage;
 
-		HistoryEvent he = new HistoryEvent(originalMessage, this.pKey);
-		provenance.add(he);
+		if(pKey != null)
+		{
+			HistoryEvent he = new HistoryEvent(originalMessage, this.pKey);
+			provenance.add(he);
+		}
 	}
 
 	public Set<String> getTraits() {
@@ -73,8 +76,11 @@ public class ParsedResult {
 
 		if (this.parsedMessage == null) {
 
-			HistoryEvent he = new HistoryEvent(parsedMessage.toString(), this.pKey);
-			provenance.add(he);
+			if(pKey != null)
+			{
+				HistoryEvent he = new HistoryEvent(parsedMessage.toString(), this.pKey);
+				provenance.add(he);
+			}
 		} else {
 
 			ObjectMapper jacksonObjectMapper = new ObjectMapper();
@@ -83,8 +89,11 @@ public class ParsedResult {
 			JsonNode patch = JsonDiff.asJson(beforeNode, afterNode);
 			String diffs = patch.toString();
 
-			HistoryEvent he = new HistoryEvent(diffs, this.pKey);
-			provenance.add(he);
+			if(pKey != null)
+			{
+				HistoryEvent he = new HistoryEvent(diffs, this.pKey);
+				provenance.add(he);
+			}
 		}
 
 		this.parsedMessage = parsedMessage;

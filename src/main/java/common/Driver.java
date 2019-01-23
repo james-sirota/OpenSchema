@@ -44,7 +44,7 @@ public class Driver {
 
 		while ((strLine = br.readLine()) != null) {
 			
-			ParsedResult result = bp.parseWithProvenance(strLine, key);
+			ParsedResult result = bp.parseMessage(strLine);
 
 			System.out.println("Raw message: ");
 			System.out.println(result.getOriginalMessage());
@@ -56,7 +56,7 @@ public class Driver {
 
 			System.out.println("Normalized message: ");			
 			bp.setConfigItem("parse.normalizeEnable", "true");
-			result = bp.parseWithProvenance(strLine, key);
+			result = bp.parseMessage(strLine, key);
 			System.out.println(result.getParsedMessage());
 			
 			System.out.println();
@@ -67,18 +67,18 @@ public class Driver {
 
 			System.out.println("Valid schemad Fields: ");
 			bp.setConfigItem("parse.basicSchemaEnforceEnable", "true");
-			result = bp.parseWithProvenance(strLine, key);
+			result = bp.parseMessage(strLine, key);
 			System.out.println(result.getValidatedFields());			
 			System.out.println();
 
 			bp.setConfigItem("parse.supertypeEnforceEnable", "true");
-			result = bp.parseWithProvenance(strLine, key);
+			result = bp.parseMessage(strLine, key);
 			System.out.println(result.getValidatedFields());
 			System.out.println();
 
 			System.out.println("Enforce restrictions: ");			
 			bp.setConfigItem("parse.restrictionEnforce", "true");
-			result = bp.parseWithProvenance(strLine, key);
+			result = bp.parseMessage(strLine, key);
 			System.out.println(result.getValidatedFields());
 			
 			System.out.println();

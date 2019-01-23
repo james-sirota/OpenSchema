@@ -80,7 +80,12 @@ public abstract class AbstractSchemadParser extends ConfiguredParser implements 
 		});
 	}
 
-	public ParsedResult parseWithProvenance(String msg, PrivateKey pKey) throws ParseException, ScriptException, IOException, NoSuchAlgorithmException {
+	public ParsedResult parseMessage(String msg) throws Exception
+	{
+		return parseMessage(msg, null);
+	}
+	
+	public ParsedResult parseMessage(String msg, PrivateKey pKey) throws Exception {
 		ParsedResult pr = new ParsedResult(pKey);
 
 		pr.setOriginalMessage(msg);
