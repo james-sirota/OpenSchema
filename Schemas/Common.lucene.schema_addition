@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema type="addition" version="0.1" namespace="luc" description="Addition for generating schemas for lucene-based indexers">
+	<fields>
+		<field name="timestamp" required="false" indexed="true" stored="true" persisted="true"/>
+		<field name="srcIp" required="false" indexed="true" stored="true" persisted="true"/>
+		<field name="dstIp" required="false" indexed="true" stored="true" persisted="true"/>
+		<field name="srcPort" required="false" indexed="true" stored="true" persisted="true"/>
+		<field name="dstPort" required="false" indexed="true" stored="true" persisted="true"/>
+		<field name="proto" indexed="true" stored="true" persisted="true"/>
+		<field name="userName" indexed="true" stored="true" persisted="true"/>
+	</fields>
+</schema>
+
