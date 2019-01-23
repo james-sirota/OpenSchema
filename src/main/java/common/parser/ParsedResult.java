@@ -22,11 +22,11 @@ public class ParsedResult {
 	private Set<String> traits;
 	private Set<HistoryEvent> provenance = new LinkedHashSet<HistoryEvent>();
 	private PrivateKey pKey;
+	private Set<String> ontologies;
 
 	private String originalMessage;
-	
-	public ParsedResult(PrivateKey pKey)
-	{
+
+	public ParsedResult(PrivateKey pKey) {
 		this.pKey = pKey;
 	}
 
@@ -36,7 +36,7 @@ public class ParsedResult {
 
 	public void setOriginalMessage(String originalMessage) throws NoSuchAlgorithmException, UnknownHostException {
 		this.originalMessage = originalMessage;
-		
+
 		HistoryEvent he = new HistoryEvent(originalMessage, this.pKey);
 		provenance.add(he);
 	}
@@ -70,19 +70,15 @@ public class ParsedResult {
 	}
 
 	public void setParsedMessage(JSONObject parsedMessage) throws IOException, NoSuchAlgorithmException {
-		
-		if(this.parsedMessage == null)
-		{
-			
-			
+
+		if (this.parsedMessage == null) {
+
 			HistoryEvent he = new HistoryEvent(parsedMessage.toString(), this.pKey);
 			provenance.add(he);
-		}
-		else
-		{
+		} else {
 
 			ObjectMapper jacksonObjectMapper = new ObjectMapper();
-			JsonNode beforeNode = jacksonObjectMapper.readTree( this.parsedMessage.toJSONString());
+			JsonNode beforeNode = jacksonObjectMapper.readTree(this.parsedMessage.toJSONString());
 			JsonNode afterNode = jacksonObjectMapper.readTree(parsedMessage.toString());
 			JsonNode patch = JsonDiff.asJson(beforeNode, afterNode);
 			String diffs = patch.toString();
@@ -90,13 +86,21 @@ public class ParsedResult {
 			HistoryEvent he = new HistoryEvent(diffs, this.pKey);
 			provenance.add(he);
 		}
-		
+
 		this.parsedMessage = parsedMessage;
-		
+
 	}
 
 	public Map<Object, Boolean> getValidatedFields() {
 		return validatedFields;
+	}
+
+	public Set<String> getOntologies() {
+		return ontologies;
+	}
+
+	public void setOntologies(Set<String> ontologies) {
+		this.ontologies = ontologies;
 	}
 
 	public void setValidatedFields(Map<Object, Boolean> map) {

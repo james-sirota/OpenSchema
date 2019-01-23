@@ -39,6 +39,9 @@ public abstract class AbstractSchemadParser extends ConfiguredParser implements 
 	private ParserConfig config;
 	private ScriptEngineManager mgr = new ScriptEngineManager();
 	private ScriptEngine engine;
+	
+
+
 
 	public AbstractSchemadParser(Map<String, String> cnf) {
 		super(cnf);
@@ -49,12 +52,12 @@ public abstract class AbstractSchemadParser extends ConfiguredParser implements 
 		logger.debug("Initializing script engine: " + getConfigItem("scriptType"));
 		engine = mgr.getEngineByName(getConfigItem("scriptType"));
 		initEngine();
-
+		
 	}
 
-	public abstract JSONObject parse(String message) throws ParseException;
+	protected abstract JSONObject parse(String message) throws ParseException;
 
-	public void initEngine() {
+	private void initEngine() {
 		// build validation functions
 
 		config.getSuperTypes().values().forEach(s -> {
@@ -82,17 +85,29 @@ public abstract class AbstractSchemadParser extends ConfiguredParser implements 
 
 		pr.setOriginalMessage(msg);
 		pr.setParsedMessage(parse(msg));
-		pr.setParsedMessage(normalize(pr.getParsedMessage()));
+		
+		if(Boolean.parseBoolean(getConfigItem("parse.normalizeEnable")))
+			pr.setParsedMessage(normalize(pr.getParsedMessage()));
+		
 		pr.setSchemadFields(getSchemadFields(pr.getParsedMessage()));
-		pr.setValidatedFields(schemaEnforce(pr.getSchemadFields(),pr.getParsedMessage()));
-		pr.setValidatedFields(supertypeEnforce(pr.getSchemadFields(),pr.getParsedMessage(), true));
+		
+		if(Boolean.parseBoolean(getConfigItem("parse.basicSchemaEnforceEnable")))
+		{
+			pr.setValidatedFields(schemaEnforce(pr.getSchemadFields(),pr.getParsedMessage()));
+			
+			if(Boolean.parseBoolean(getConfigItem("parse.supertypeEnforceEnable")))
+				pr.setValidatedFields(supertypeEnforce(pr.getSchemadFields(),pr.getParsedMessage(), Boolean.parseBoolean(getConfigItem("parse.restrictionEnforce"))));
+		}
+		
+		pr.setTraits(extractTraits(pr.getParsedMessage()));
+		pr.setOntologies(getOntologies(pr.getParsedMessage()));
 
 		return pr;
 
 	}
 
 	@SuppressWarnings("unchecked")
-	public JSONObject normalize(JSONObject message) throws ParseException {
+	private JSONObject normalize(JSONObject message) throws ParseException {
 
 		logger.debug("Looking at raw message: " + message);
 
@@ -124,7 +139,7 @@ public abstract class AbstractSchemadParser extends ConfiguredParser implements 
 
 	}
 
-	public Set<Object> getSchemadFields(JSONObject message) {
+	private Set<Object> getSchemadFields(JSONObject message) {
 
 		logger.debug("Looking at normalized message: " + message);
 
@@ -143,7 +158,7 @@ public abstract class AbstractSchemadParser extends ConfiguredParser implements 
 	}
 
 	@SuppressWarnings("unchecked")
-	public Map<Object, Boolean> schemaEnforce(Set<Object> foundFields, JSONObject message) {
+	private Map<Object, Boolean> schemaEnforce(Set<Object> foundFields, JSONObject message) {
 		logger.debug("Looking at schemad message: " + message);
 
 		Map<Object, Boolean> valid = new TreeMap<Object, Boolean>();
@@ -185,7 +200,7 @@ public abstract class AbstractSchemadParser extends ConfiguredParser implements 
 		return valid;
 	}
 
-	public Map<Object, Boolean> supertypeEnforce(Set<Object> fieldsToCheck, JSONObject message,
+	private Map<Object, Boolean> supertypeEnforce(Set<Object> fieldsToCheck, JSONObject message,
 			boolean withLocalizedRestrictions) throws ScriptException {
 		logger.debug("Enforcing super types for message : " + message);
 
@@ -258,7 +273,7 @@ public abstract class AbstractSchemadParser extends ConfiguredParser implements 
 	}
 
 	@SuppressWarnings("unchecked")
-	public Set<String> extractTraits(JSONObject message) {
+	private Set<String> extractTraits(JSONObject message) {
 
 		logger.debug("Looking for traits in: " + message);
 
@@ -277,7 +292,7 @@ public abstract class AbstractSchemadParser extends ConfiguredParser implements 
 		return traitsFound;
 	}
 
-	public Set<String> getOntologies(JSONObject message) {
+	private Set<String> getOntologies(JSONObject message) {
 
 		logger.debug("Looking for Ontologies in: " + message);
 

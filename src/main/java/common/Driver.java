@@ -31,51 +31,64 @@ public class Driver {
 		Map<String, String> parserConfig = cfr.getConfig("Schema.conf");
 
 		BroParser bp = new BroParser(parserConfig);
+		
+		//overwrite config items for demo purposes
+		bp.setConfigItem("parse.normalizeEnable", "false");
+		bp.setConfigItem("parse.basicSchemaEnforceEnable", "false");
+		bp.setConfigItem("parse.supertypeEnforceEnable", "false");
+		bp.setConfigItem("parse.restrictionEnforce", "false");
+		
+	
+		PrivateKey key = cfr.readPrivateKey("./Keys/private_key.der");
+		
 
 		while ((strLine = br.readLine()) != null) {
+			
+			ParsedResult result = bp.parseWithProvenance(strLine, key);
 
 			System.out.println("Raw message: ");
-			System.out.println(strLine);
+			System.out.println(result.getOriginalMessage());
 			System.out.println();
 
-			System.out.println("Parsed message: ");
-			JSONObject message = bp.parse(strLine);
-			System.out.println(message);
+			System.out.println("Parsed message: ");			
+			System.out.println(result.getParsedMessage());
 			System.out.println();
 
-			System.out.println("Normalized message: ");
-			JSONObject normalizedMessage = bp.normalize(message);
-			System.out.println(normalizedMessage);
+			System.out.println("Normalized message: ");			
+			bp.setConfigItem("parse.normalizeEnable", "true");
+			result = bp.parseWithProvenance(strLine, key);
+			System.out.println(result.getParsedMessage());
+			
 			System.out.println();
 
 			System.out.println("Schemad Fields: ");
-			Set<Object> schemadFields = bp.getSchemadFields(normalizedMessage);
-			System.out.println(schemadFields);
+			System.out.println(result.getSchemadFields());
 			System.out.println();
 
 			System.out.println("Valid schemad Fields: ");
-			Map<Object, Boolean> valid = bp.schemaEnforce(schemadFields, normalizedMessage);
-			System.out.println(valid);
+			bp.setConfigItem("parse.basicSchemaEnforceEnable", "true");
+			result = bp.parseWithProvenance(strLine, key);
+			System.out.println(result.getValidatedFields());			
 			System.out.println();
 
-			System.out.println("Enforce supertype Fields: ");
-			valid = bp.supertypeEnforce(schemadFields, normalizedMessage, false);
-			System.out.println(valid);
+			bp.setConfigItem("parse.supertypeEnforceEnable", "true");
+			result = bp.parseWithProvenance(strLine, key);
+			System.out.println(result.getValidatedFields());
 			System.out.println();
 
-			System.out.println("Enforce restrictions: ");
-			valid = bp.supertypeEnforce(schemadFields, normalizedMessage, true);
-			System.out.println(valid);
+			System.out.println("Enforce restrictions: ");			
+			bp.setConfigItem("parse.restrictionEnforce", "true");
+			result = bp.parseWithProvenance(strLine, key);
+			System.out.println(result.getValidatedFields());
+			
 			System.out.println();
 
 			System.out.println("Extracted traits: ");
-			Set<String> traits = bp.extractTraits(normalizedMessage);
-			System.out.println(traits);
+			System.out.println(result.getTraits());
 			System.out.println();
 
 			System.out.println("Extracted ontologies: ");
-			Set<String> ontologies = bp.getOntologies(normalizedMessage);
-			System.out.println(ontologies);
+			System.out.println(result.getOntologies());
 			System.out.println();
 			
 			
@@ -86,12 +99,11 @@ public class Driver {
 			cnv = (SchemaConverter) new ElasticConverter(parserConfig);
 			cnv.convert("./Output/Elastic.schema");
 			
-			PrivateKey key = cfr.readPrivateKey("./Keys/private_key.der");
-			ParsedResult result = bp.parseWithProvenance(strLine, key);
-			
 			DocumentationGenerator dg = new DocumentationGenerator(parserConfig);
 			dg.generate("./Output/SchemaDocs.md");
+			
 
+			
 			System.out.println("Provenance: ");
 			for(HistoryEvent he : result.getProvenance())
 			{
